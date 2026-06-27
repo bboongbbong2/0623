@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    if (localStorage.getItem('ethics_agreement') !== 'true') {
+      window.location.href = 'gate.html';
+    }
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>교사용 상담 관리 대시보드</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- FullCalendar CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <h1>Counseling <span>교사용 관리자</span></h1>
+      <nav>
+        <a href="index.html" class="nav-btn">학생용 신청 페이지</a>
+      </nav>
+    </header>
+
+    <!-- Dashboard Main Layout -->
+    <div class="admin-container">
+      
+      <!-- Left Column: Calendar View -->
+      <section class="card" style="grid-column: span 1;">
+        <h3 class="card-title">상담 캘린더 일정</h3>
+        <div id="calendar"></div>
+        <div style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; font-size: 0.85rem;">
+          <span style="display: flex; align-items: center; gap: 5px;">
+            <span style="width: 12px; height: 12px; background: var(--status-pending); border-radius: 50%;"></span> 대기 중
+          </span>
+          <span style="display: flex; align-items: center; gap: 5px;">
+            <span style="width: 12px; height: 12px; background: var(--status-confirmed); border-radius: 50%;"></span> 상담 확정
+          </span>
+          <span style="display: flex; align-items: center; gap: 5px;">
+            <span style="width: 12px; height: 12px; background: var(--status-completed); border-radius: 50%;"></span> 상담 완료
+          </span>
+        </div>
+      </section>
+
+      <!-- Right Column: List & Details -->
+      <div style="display: flex; flex-direction: column; gap: 30px;">
+        
+        <!-- 1. 일정 상세 및 상태 관리 카드 -->
+        <section class="card" id="detail-card">
+          <h3 class="card-title">선택한 일정 관리</h3>
+          <div id="no-selection-msg" style="color: var(--text-muted); text-align: center; padding: 20px;">
+            캘린더에서 일정을 클릭하거나 아래 목록에서 선택하세요.
+          </div>
+          
+          <div id="selection-details" style="display: none; flex-direction: column; gap: 15px;">
+            <div class="result-item">
+              <span class="result-label">학번</span>
+              <span class="result-value" id="detail-student-id"></span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">이름</span>
+              <span class="result-value" id="detail-name"></span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">상담 일시</span>
+              <span class="result-value" id="detail-time"></span>
+            </div>
+            
+            <form id="status-update-form">
+              <input type="hidden" id="detail-appt-id">
+              <div class="form-group">
+                <label for="detail-status">상담 상태</label>
+                <select id="detail-status">
+                  <option value="pending">대기 중 (노란색)</option>
+                  <option value="confirmed">상담 확정 (초록색)</option>
+                  <option value="completed">상담 완료 (회색)</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="submit" class="btn" style="flex: 1; padding: 10px;">상태 저장</button>
+                <button type="button" id="btn-delete-appt" class="btn btn-danger" style="padding: 10px;">삭제</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- 2. 행정용 설정 & 심의 체크리스트 카드 -->
+        <section class="card">
+          <h3 class="card-title">행정 및 심의 설정</h3>
+          <div class="checkbox-group">
+            <div class="form-group">
+              <label>1. 본 시스템의 사용 목적</label>
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                <label class="checkbox-label">
+                  <input type="radio" name="use-purpose" value="admin-only" checked>
+                  교사 단독 행정 및 업무용 (학교 내부 검토 대상 아님)
+                </label>
+                <label class="checkbox-label">
+                  <input type="radio" name="use-purpose" value="class-student">
+                  정규 수업 중 학생 직접 사용 (학습교구 심의 필요 여부 검토)
+                </label>
+                <label class="checkbox-label">
+                  <input type="radio" name="use-purpose" value="home-parent">
+                  가정 학습 및 과제용 (안전성 조치 강화 대상)
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+              <label>2. Google Calendar 연동 스위치</label>
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="sync-google-cal">
+                  실제 Google Calendar API 연동 활성화
+                </label>
+                <div id="google-cal-settings" style="display: none; padding-left: 20px; font-size: 0.85rem; color: var(--text-muted);">
+                  <div class="form-group">
+                    <label>OAuth 2.0 Client ID</label>
+                    <input type="text" id="g-client-id" placeholder="Google Client ID 입력">
+                  </div>
+                  <div class="form-group" style="margin-top: 5px;">
+                    <label>API Key</label>
+                    <input type="password" id="g-api-key" placeholder="Google API Key 입력">
+                  </div>
+                  <p style="margin-top: 5px; font-size: 0.75rem; color: #b45309;">
+                    ※ 실제 연동 시 Google Cloud 프로젝트 생성 및 심의 절차가 선행되어야 합니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+              <button class="btn btn-secondary" id="btn-export-csv" style="padding: 10px 15px; font-size: 0.9rem;">
+                상담 대장 다운로드 (CSV)
+              </button>
+              <button class="btn btn-danger" id="btn-purge-data" style="padding: 10px 15px; font-size: 0.9rem;">
+                개인정보 전체 파기
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Bottom: Search and List Section -->
+    <section class="card" style="margin-top: 10px;">
+      <h3 class="card-title">상담 신청 현황 검색 및 목록</h3>
+      <div class="search-container">
+        <input type="text" id="admin-search-input" placeholder="학번 또는 이름으로 일정 검색">
+        <button type="button" class="btn" id="btn-search-clear" style="padding: 10px 20px;">초기화</button>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>학번</th>
+              <th>이름</th>
+              <th>상담 일시</th>
+              <th>진행 상태</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="appt-list-body">
+            <!-- Data dynamically loaded -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>세종과학고등학교 상담지원센터</h3>
+        <p>본 사이트는 학생 상담 신청 및 관리를 지원하는 내부 업무 전용 웹 서비스입니다.</p>
+        <p style="margin-top: 10px;">담당자: 상담 교사 홍길동 | 문의: 02-1234-5678</p>
+      </div>
+      <div class="footer-section">
+        <h3>약관 및 정책</h3>
+        <div class="footer-links">
+          <a onclick="openModal('privacy-modal')">개인정보 처리방침</a>
+          <a onclick="openModal('terms-modal')">이용약관</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 세종과학고등학교. All Rights Reserved.</p>
+      <p>시행일: 2026년 3월 2일 | 최근변경일: 2026년 6월 23일</p>
+    </div>
+  </footer>
+
+  <!-- Privacy Modal -->
+  <div id="privacy-modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('privacy-modal')">&times;</button>
+      <div class="policy-text" id="privacy-content-area">
+        <p>불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms Modal -->
+  <div id="terms-modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('terms-modal')">&times;</button>
+      <div class="policy-text" id="terms-content-area">
+        <p>불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    if (localStorage.getItem('ethics_agreement') !== 'true') {
+      window.location.href = 'gate.html';
+    }
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학생 상담 신청 및 조회 시스템</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <h1>Counseling <span>학생용</span></h1>
+      <nav>
+        <a href="admin.html" class="nav-btn">교사용 관리자 페이지</a>
+      </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero">
+      <h2>학생 상담 신청</h2>
+      <p>원하는 상담 날짜와 시간을 선택하여 간편하게 상담을 신청하고 결과를 조회할 수 있습니다.</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-grid">
+      <!-- 1. 상담 신청 카드 -->
+      <section class="card" id="apply-card">
+        <h3 class="card-title">상담 신청하기</h3>
+        <form id="consultation-form">
+          <div class="form-group">
+            <label for="student-id">학번</label>
+            <input type="text" id="student-id" placeholder="예: 30101" required pattern="^[0-9]{5}$" title="학번 5자리를 입력해주세요 (예: 30101)">
+          </div>
+          <div class="form-group">
+            <label for="student-name">이름</label>
+            <input type="text" id="student-name" placeholder="홍길동" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="desired-date">희망 날짜</label>
+              <input type="date" id="desired-date" required>
+            </div>
+            <div class="form-group">
+              <label for="desired-time">희망 시간</label>
+              <select id="desired-time" required>
+                <option value="">시간 선택</option>
+                <option value="09:00">09:00 - 10:00 (1교시)</option>
+                <option value="10:00">10:00 - 11:00 (2교시)</option>
+                <option value="11:00">11:00 - 12:00 (3교시)</option>
+                <option value="13:00">13:00 - 14:00 (점심시간)</option>
+                <option value="14:00">14:00 - 15:00 (5교시)</option>
+                <option value="15:00">15:00 - 16:00 (6교시)</option>
+                <option value="16:00">16:00 - 17:00 (방과후)</option>
+              </select>
+            </div>
+          </div>
+          <div class="alert-info" style="margin-top: 10px; font-size: 0.85rem;">
+            ※ 본 시스템은 상담 내용은 일체 입력받지 않으며, 이름과 학번, 일정 정보만 안전하게 수집합니다.
+          </div>
+          <button type="submit" class="btn">상담 신청 제출</button>
+        </form>
+      </section>
+
+      <!-- 2. 신청 현황 조회 카드 -->
+      <section class="card" id="lookup-card">
+        <h3 class="card-title">신청 완료 여부 및 일정 조회</h3>
+        <form id="lookup-form">
+          <div class="form-group">
+            <label for="lookup-id">학번</label>
+            <input type="text" id="lookup-id" placeholder="예: 30101" required pattern="^[0-9]{5}$" title="학번 5자리를 입력해주세요 (예: 30101)">
+          </div>
+          <div class="form-group">
+            <label for="lookup-name">이름</label>
+            <input type="text" id="lookup-name" placeholder="홍길동" required>
+          </div>
+          <button type="submit" class="btn btn-secondary">내 일정 조회하기</button>
+        </form>
+
+        <!-- 조회 결과 출력 영역 -->
+        <div id="lookup-result" class="result-box">
+          <div class="result-item">
+            <span class="result-label">학번 / 이름</span>
+            <span class="result-value" id="res-student-info"></span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">상담 완료 여부</span>
+            <span class="result-value" id="res-status-badge"></span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">다음 일정</span>
+            <span class="result-value" id="res-schedule-time"></span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>세종과학고등학교 상담지원센터</h3>
+        <p>본 사이트는 학생 상담 신청 및 관리를 지원하는 내부 업무 전용 웹 서비스입니다.</p>
+        <p style="margin-top: 10px;">담당자: 상담 교사 홍길동 | 문의: 02-1234-5678</p>
+      </div>
+      <div class="footer-section">
+        <h3>약관 및 정책</h3>
+        <div class="footer-links">
+          <a onclick="openModal('privacy-modal')">개인정보 처리방침</a>
+          <a onclick="openModal('terms-modal')">이용약관</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 세종과학고등학교. All Rights Reserved.</p>
+      <p>시행일: 2026년 3월 2일 | 최근변경일: 2026년 6월 23일</p>
+    </div>
+  </footer>
+
+  <!-- Privacy Modal -->
+  <div id="privacy-modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('privacy-modal')">&times;</button>
+      <div class="policy-text" id="privacy-content-area">
+        <p>불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms Modal -->
+  <div id="terms-modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('terms-modal')">&times;</button>
+      <div class="policy-text" id="terms-content-area">
+        <p>불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
